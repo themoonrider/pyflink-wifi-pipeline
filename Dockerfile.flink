@@ -1,0 +1,29 @@
+FROM arm64v8/flink:2.0-scala_2.12-java11
+
+# Install Python, pip, and JDK (required for pemja compilation)
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    openjdk-11-jdk \
+    build-essential \
+    && ln -s /usr/bin/python3 /usr/bin/python \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set JAVA_HOME environment variable
+ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-arm64
+
+# Copy requirements and install Python packages
+COPY requirements.txt /opt/requirements.txt
+RUN pip3 install -r /opt/requirements.txt
+
+# Copy source code
+COPY src/ /opt/src/
+COPY data/ /opt/data/
+
+# Set working directory
+WORKDIR /opt
+
+# Create logs directory
+RUN mkdir -p /opt/logs
